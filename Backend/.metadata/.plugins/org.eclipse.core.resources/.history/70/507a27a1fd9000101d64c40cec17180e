@@ -1,0 +1,5 @@
+package com.sih.controller;
+
+public class AuthController {
+
+}

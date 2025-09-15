@@ -1,0 +1,5 @@
+package com.sih.repository;
+
+public interface UserRepository {
+
+}
