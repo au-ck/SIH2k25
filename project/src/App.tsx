@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import SplashScreen from './components/SplashScreen';
 import MainOptions from './components/MainOptions';
 import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
 import TrackBus from './components/TrackBus';
 import FindBus from './components/FindBus';
 import UserProfile from './components/UserProfile';
@@ -75,68 +76,53 @@ function App() {
     <Router>
       <div className="min-h-screen bg-[#ECF39E]">
         <Routes>
-          <Route path="/" element={
-            isLoggedIn ? 
-              <Dashboard user={user} /> : 
-              <MainOptions isLoggedIn={isLoggedIn} />
-          } />
-          <Route 
-            path="/login" 
-            element={<LoginPage onLogin={handleLogin} />} 
-          />
-          <Route 
-            path="/main-options" 
-            element={<MainOptions isLoggedIn={isLoggedIn} />} 
-          />
-          <Route 
-            path="/track-bus" 
+          {/* Root Route */}
+          <Route
+            path="/"
             element={
-              isLoggedIn ? 
-                <TrackBus user={user} /> : 
-                <Navigate to="/login" />
-            } 
+              isLoggedIn ? (
+                <Dashboard user={user} />
+              ) : (
+                <MainOptions isLoggedIn={isLoggedIn} />
+              )
+            }
           />
-          <Route 
-            path="/find-bus" 
-            element={
-              isLoggedIn ? 
-                <FindBus user={user} /> : 
-                <Navigate to="/login" />
-            } 
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          <Route path="/signup" element={<SignupPage onSignup={handleLogin} />} />
+
+          {/* Main Options */}
+          <Route path="/main-options" element={<MainOptions isLoggedIn={isLoggedIn} />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/track-bus"
+            element={isLoggedIn ? <TrackBus user={user} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/book-bus" 
-            element={
-              isLoggedIn ? 
-                <BookBus user={user} setUser={setUser} /> : 
-                <Navigate to="/login" />
-            } 
+          <Route
+            path="/find-bus"
+            element={isLoggedIn ? <FindBus user={user} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/my-bookings" 
-            element={
-              isLoggedIn ? 
-                <MyBookings user={user} setUser={setUser} /> : 
-                <Navigate to="/login" />
-            } 
+          <Route
+            path="/book-bus"
+            element={isLoggedIn ? <BookBus user={user} setUser={setUser} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/payment/:bookingId" 
-            element={
-              isLoggedIn ? 
-                <PaymentPage user={user} setUser={setUser} /> : 
-                <Navigate to="/login" />
-            } 
+          <Route
+            path="/my-bookings"
+            element={isLoggedIn ? <MyBookings user={user} setUser={setUser} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/profile" 
-            element={
-              isLoggedIn ? 
-                <UserProfile user={user} onLogout={handleLogout} /> : 
-                <Navigate to="/login" />
-            } 
+          <Route
+            path="/payment/:bookingId"
+            element={isLoggedIn ? <PaymentPage user={user} setUser={setUser} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile"
+            element={isLoggedIn ? <UserProfile user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
           />
         </Routes>
+
+        {/* Voice Assistant active only if logged in */}
         {isLoggedIn && <VoiceAssistant />}
       </div>
     </Router>

@@ -4,7 +4,7 @@ import { MapPin, Navigation, Clock, Users, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../App';
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+// import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 interface TrackBusProps {
@@ -20,6 +20,7 @@ interface BusLocation {
   nextStop: string;
   eta: string;
   occupancy: string;
+  route: string; // Added route property for filtering
 }
 
 // custom 🚌 bus icon
@@ -29,49 +30,73 @@ const busIcon = new L.Icon({
   iconAnchor: [16, 32],
 });
 
+const mockRoutes = {
+  'University Campus': { lat: 17.5143, lng: 80.3807 },
+  'City Center': { lat: 17.6580, lng: 83.2104 },
+  'Tech Park': { lat: 12.9716, lng: 77.5946 },
+  'Residential Area': { lat: 19.0760, lng: 72.8777 }
+};
+
 const TrackBus: React.FC<TrackBusProps> = ({ user }) => {
   const navigate = useNavigate();
   const [selectedBus, setSelectedBus] = useState<BusLocation | null>(null);
   const [fromLocation, setFromLocation] = useState('');
   const [toLocation, setToLocation] = useState('');
   const [buses, setBuses] = useState<BusLocation[]>([]);
+  const [filteredBuses, setFilteredBuses] = useState<BusLocation[]>([]);
 
+  // 1. **Simulate Initial Bus Data**
+  // This is your mock "backend" data. You can expand this array with more routes.
   useEffect(() => {
-    // Simulate real-time bus data
-    const simulateBuses = () => {
-      setBuses([
-        {
-          id: '1',
-          number: 'MH12AB1234',
-          lat: 19.0760 + Math.random() * 0.05,
-          lng: 72.8777 + Math.random() * 0.05,
-          speed: 45,
-          nextStop: 'Tech Park Gate 2',
-          eta: '5 mins',
-          occupancy: 'Medium'
-        },
-        {
-          id: '2',
-          number: 'MH14CD5678',
-          lat: 18.5204 + Math.random() * 0.05,
-          lng: 73.8567 + Math.random() * 0.05,
-          speed: 35,
-          nextStop: 'Mall Junction',
-          eta: '8 mins',
-          occupancy: 'High'
-        }
-      ]);
+    setBuses([
+      {
+        id: '1', number: 'MH12AB1234', lat: 19.0760, lng: 72.8777,
+        speed: 45, nextStop: 'Residential Area Stop', eta: '5 mins', occupancy: 'Medium', route: 'Campus-to-Residential'
+      },
+      {
+        id: '2', number: 'KA01CD5678', lat: 12.9716, lng: 77.5946,
+        speed: 35, nextStop: 'Tech Park Gate 2', eta: '8 mins', occupancy: 'High', route: 'TechPark-to-CityCenter'
+      },
+      {
+        id: '3', number: 'TS07EF9012', lat: 17.5143, lng: 80.3807,
+        speed: 50, nextStop: 'University Main Gate', eta: '3 mins', occupancy: 'Low', route: 'Campus-to-CityCenter'
+      }
+    ]);
+  }, []);
+
+  // 2. **Simulate Real-Time Movement**
+  useEffect(() => {
+    const simulateMovement = () => {
+      setBuses(prevBuses =>
+        prevBuses.map(bus => ({
+          ...bus,
+          lat: bus.lat + (Math.random() - 0.5) * 0.001, // Small random change to lat
+          lng: bus.lng + (Math.random() - 0.5) * 0.001, // Small random change to lng
+          // ETA logic could be more complex but for a university project, simple is fine
+          eta: `${Math.max(1, parseInt(bus.eta) - 1)} mins` 
+        }))
+      );
     };
 
-    simulateBuses();
-    const interval = setInterval(simulateBuses, 5000);
+    const interval = setInterval(simulateMovement, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  // 3. **Implement Search & Filtering**
   const handleSearchBus = () => {
-    if (fromLocation && toLocation) {
-      setSelectedBus(buses[0]); // pick first bus for demo
+    let route = '';
+    // A simplified way to determine the route based on the search inputs
+    if (fromLocation.includes('Campus') && toLocation.includes('Residential')) {
+      route = 'Campus-to-Residential';
+    } else if (fromLocation.includes('Tech') && toLocation.includes('City')) {
+      route = 'TechPark-to-CityCenter';
+    } else if (fromLocation.includes('Campus') && toLocation.includes('City')) {
+      route = 'Campus-to-CityCenter';
     }
+    
+    const matchedBuses = buses.filter(bus => bus.route === route);
+    setFilteredBuses(matchedBuses);
+    setSelectedBus(matchedBuses.length > 0 ? matchedBuses[0] : null);
   };
 
   return (
@@ -107,9 +132,9 @@ const TrackBus: React.FC<TrackBusProps> = ({ user }) => {
                 value={fromLocation}
                 onChange={(e) => {
                   setFromLocation(e.target.value);
-                  setSelectedBus(null); // reset map if user changes input
+                  setSelectedBus(null); 
                 }}
-                placeholder="From location"
+                placeholder="From location (e.g., Campus)"
                 className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#90A955] focus:outline-none"
               />
             </div>
@@ -120,9 +145,9 @@ const TrackBus: React.FC<TrackBusProps> = ({ user }) => {
                 value={toLocation}
                 onChange={(e) => {
                   setToLocation(e.target.value);
-                  setSelectedBus(null); // reset map if user changes input
+                  setSelectedBus(null);
                 }}
-                placeholder="To location"
+                placeholder="To location (e.g., City Center)"
                 className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#90A955] focus:outline-none"
               />
             </div>
@@ -136,7 +161,7 @@ const TrackBus: React.FC<TrackBusProps> = ({ user }) => {
           </div>
         </motion.div>
 
-        {/* 🌍 Real Map Section (only show after search) */}
+        {/* 🌍 Map Section (show only after search) */}
         {selectedBus && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -153,7 +178,7 @@ const TrackBus: React.FC<TrackBusProps> = ({ user }) => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
               />
 
-              {buses.map((bus) => (
+              {filteredBuses.map((bus) => (
                 <Marker
                   key={bus.id}
                   position={[bus.lat, bus.lng]}

@@ -1,0 +1,17 @@
+[
+  { "name": "Hyderabad", "lat": 17.385044, "lon": 78.486671 },
+  { "name": "Secunderabad", "lat": 17.439930, "lon": 78.498276 },
+  { "name": "Bengaluru", "lat": 12.971599, "lon": 77.594566 },
+  { "name": "Mumbai", "lat": 19.076090, "lon": 72.877426 },
+  { "name": "Pune", "lat": 18.520430, "lon": 73.856743 },
+  { "name": "Delhi", "lat": 28.613939, "lon": 77.209023 },
+  { "name": "Chennai", "lat": 13.082680, "lon": 80.270718 },
+  { "name": "Kolkata", "lat": 22.572645, "lon": 88.363892 },
+  { "name": "Ananthagiri Village", "lat": 17.348500, "lon": 78.667800 },
+  { "name": "Papikondalu Village", "lat": 17.441000, "lon": 81.794000 },
+  { "name": "Rampur", "lat": 28.815300, "lon": 79.025000 },
+  { "name": "Adilabad", "lat": 19.664000, "lon": 78.532000 },
+  { "name": "Gadchiroli", "lat": 20.190000, "lon": 80.000000 },
+  { "name": "Warangal", "lat": 17.978400, "lon": 79.594100 },
+  { "name": "Nalgonda", "lat": 17.052000, "lon": 79.267000 }
+]

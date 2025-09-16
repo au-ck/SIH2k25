@@ -4,14 +4,15 @@ import { Phone, ArrowRight, Check } from 'lucide-react';
 import { User } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-interface LoginPageProps {
-  onLogin: (user: User) => void;
+interface SignupPageProps {
+  onSignup: (user: User) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+const SignupPage: React.FC<SignupPageProps> = ({ onSignup }) => {
+  const [step, setStep] = useState<'phone' | 'otp' | 'profile'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -26,41 +27,37 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length <= 1 && /^\d*$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      if (value && index < 5) {
-        const nextInput = document.getElementById(`otp-${index + 1}`);
-        nextInput?.focus();
-      }
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.join('').length === 6) {
+      setLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setLoading(false);
+      setStep('profile');
     }
   };
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const otpValue = otp.join('');
-    if (otpValue.length === 6) {
+    if (name.trim()) {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Mock user data after login
       const userData: User = {
-        id: '1',
-        name: 'Existing User',
-        phone: phone,
+        id: Date.now().toString(),
+        name,
+        phone,
         photo: 'https://via.placeholder.com/150',
-        totalTrips: 10,
-        avgDistance: 15.2,
-        totalSpent: 1200,
+        totalTrips: 0,
+        avgDistance: 0,
+        totalSpent: 0,
         rides: [],
         bookings: []
       };
 
       setLoading(false);
-      onLogin(userData);   // ✅ update user state
-      navigate('/');       // ✅ redirect to Dashboard
+      onSignup(userData);   // ✅ save new user
+      navigate('/');        // ✅ go to Dashboard
     }
   };
 
@@ -79,12 +76,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="w-20 h-20 bg-[#90A955] rounded-full flex items-center justify-center mx-auto mb-4"
           >
-            <span className="text-3xl">🔑</span>
+            <span className="text-3xl">✨</span>
           </motion.div>
-          <h2 className="text-3xl font-bold text-[#132A13] mb-2">Login</h2>
+          <h2 className="text-3xl font-bold text-[#132A13] mb-2">Sign Up</h2>
           <p className="text-[#31572C] text-lg">
-            {step === 'phone' && 'Enter your registered number'}
-            {step === 'otp' && 'Enter OTP to continue'}
+            {step === 'phone' && 'Enter your mobile number'}
+            {step === 'otp' && 'Verify OTP'}
+            {step === 'profile' && 'Complete your profile'}
           </p>
         </div>
 
@@ -101,7 +99,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-[#90A955] focus:outline-none text-lg"
-                  placeholder="Enter your mobile number"
+                  placeholder="Enter your number"
                   maxLength={10}
                   required
                 />
@@ -126,10 +124,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               {otp.map((digit, index) => (
                 <input
                   key={index}
-                  id={`otp-${index}`}
                   type="text"
                   value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onChange={(e) => {
+                    const newOtp = [...otp];
+                    newOtp[index] = e.target.value;
+                    setOtp(newOtp);
+                  }}
                   className="w-12 h-12 text-center border-2 border-gray-200 rounded-xl focus:border-[#90A955] focus:outline-none text-xl font-bold"
                   maxLength={1}
                 />
@@ -140,15 +141,38 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               disabled={loading || otp.join('').length < 6}
               className="w-full bg-[#90A955] text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-[#4F772D] transition-colors duration-300 flex items-center justify-center"
             >
-              {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> : <>Verify <Check className="ml-2 w-5 h-5" /></>}
+              {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> : <>Verify OTP <Check className="ml-2 w-5 h-5" /></>}
+            </button>
+          </form>
+        )}
+
+        {step === 'profile' && (
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-[#132A13] mb-2">Your Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-[#90A955] focus:outline-none text-lg"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !name.trim()}
+              className="w-full bg-[#90A955] text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-[#4F772D] transition-colors duration-300 flex items-center justify-center"
+            >
+              {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> : <>Complete Setup <Check className="ml-2 w-5 h-5" /></>}
             </button>
           </form>
         )}
 
         <p className="text-center mt-6 text-sm text-[#31572C]">
-          Don’t have an account?{" "}
-          <span className="text-[#4F772D] font-semibold cursor-pointer" onClick={() => navigate('/signup')}>
-            Sign up
+          Already have an account?{" "}
+          <span className="text-[#4F772D] font-semibold cursor-pointer" onClick={() => navigate('/login')}>
+            Login
           </span>
         </p>
       </motion.div>
@@ -156,4 +180,4 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;
