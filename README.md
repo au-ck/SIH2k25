@@ -12,11 +12,11 @@ SIH2k25 is a web-based application that helps users track buses in real time and
 - Optimized for low-bandwidth environments
 
 ## Technologies Used  
-- **Frontend:** HTML, CSS, JavaScript  
+- **Frontend:** HTML, CSS, TypeScript  
 - **Voice Recognition:** Web Speech API  
 - **Backend:** Spring Boot (Java)  
-- **Map Integration:** Google Maps API or Leaflet.js  
-- **Database:** MySQL / MongoDB (as applicable)
+- **Map Integration:** Leaflet.js  
+- **Database:** MySQL
 
 ## Accessibility and Regional Support  
 Built for Tier-2 cities and semi-urban areas, the system is optimized to work even with limited internet connectivity. Multilingual support is planned to help users interact in their preferred language. The voice command feature makes the app more inclusive for users with limited digital experience.
@@ -29,7 +29,7 @@ Users can say "Demo" to trigger a video walkthrough that explains how to use the
 ### Backend (Spring Boot)
 1. Clone the repository  
    ```
-   git clone https://github.com/SANDARBH-SINGH/SIH2K25.git
+   git clone https://github.com/au-ck/SIH2k25.git
    ```
 2. Open the project in your preferred IDE (e.g., IntelliJ, Eclipse)  
 3. Configure database settings in `application.properties`  
